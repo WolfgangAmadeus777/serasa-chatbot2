@@ -688,9 +688,18 @@ export default function ChatPage() {
 
   if (!cpf) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <h1 className="text-xl font-semibold text-gray-800 mb-4">CPF não encontrado</h1>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-100 flex items-center justify-center">
+        <Card className="p-8 text-center bg-white shadow-xl border-0">
+          <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/unnamed-mc1cq9oGl94BkoUSXsitt93EG7m1IA.png"
+              alt="Serasa"
+              width={48}
+              height={48}
+              className="w-12 h-12 rounded-full"
+            />
+          </div>
+          <h1 className="text-xl font-semibold text-gray-800 mb-4">CPF nao encontrado</h1>
           <p className="text-gray-600">Por favor, volte e insira seu CPF novamente.</p>
         </Card>
       </div>
@@ -698,7 +707,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white">
       <div className="sticky top-0 z-50 bg-pink-600 text-white p-4 shadow-lg">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
           <Image
@@ -709,16 +718,31 @@ export default function ChatPage() {
             className="h-8 w-auto"
           />
           <div className="flex-1">
-            <h1 className="font-semibold">Atendimento Serasa</h1>
-            <p className="text-sm opacity-90">Renata - Consultora Online</p>
+            <h1 className="font-semibold text-lg">Atendimento Serasa</h1>
+            <p className="text-sm opacity-90 flex items-center gap-2">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+              Renata - Consultora Online
+            </p>
           </div>
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-            <div className="w-2 h-2 bg-white rounded-full"></div>
+          <div className="flex items-center gap-2">
+            <div className="text-right hidden sm:block">
+              <p className="text-xs opacity-75">Feirao Limpa Nome</p>
+              <p className="text-xs font-semibold">Ultimo dia!</p>
+            </div>
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/unnamed-mc1cq9oGl94BkoUSXsitt93EG7m1IA.png"
+                alt="Atendente"
+                width={36}
+                height={36}
+                className="w-9 h-9 rounded-full"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto bg-white min-h-[calc(100vh-80px)] relative">
+      <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm min-h-[calc(100vh-80px)] relative shadow-xl">
         <div className="p-4 space-y-4 pb-20">
           {isLoading && (
             <div className="flex justify-center py-8">
@@ -750,7 +774,7 @@ export default function ChatPage() {
                     </div>
                     <div className="flex-1">
                       <div
-                        className={`${message.sender === "bot" ? "bg-pink-100 border-pink-200" : "bg-blue-100 border-blue-200"} rounded-lg p-3 border`}
+                        className={`${message.sender === "bot" ? "bg-gray-100 border-gray-200 shadow-sm" : "bg-pink-600 text-white border-pink-600 shadow-sm"} rounded-2xl p-4 border`}
                       >
                         {message.type === "image" && message.imageUrl && (
                           <div className="mb-2">
@@ -827,7 +851,7 @@ export default function ChatPage() {
 
                         {message.type === "data-confirmation" ? (
                           <div>
-                            <p className="text-sm text-gray-800 mb-4">{message.content}</p>
+                            <p className={`text-sm ${message.sender === "bot" ? "text-gray-800" : "text-white"} mb-4`}>{message.content}</p>
                             {message.data && (
                               <div className="bg-white rounded p-3 mb-4 text-sm border">
                                 <p>
@@ -850,7 +874,7 @@ export default function ChatPage() {
                           </div>
                         ) : (
                           <div>
-                            <p className="text-sm text-gray-800 whitespace-pre-line">{message.content}</p>
+                            <p className={`text-sm ${message.sender === "bot" ? "text-gray-800" : "text-white"} whitespace-pre-line`}>{message.content}</p>
                           </div>
                         )}
                       </div>
@@ -879,7 +903,7 @@ export default function ChatPage() {
                         <div
                           key={index}
                           onClick={() => handleButtonClick(button.action, button.text)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-3 cursor-pointer shadow-md hover:shadow-lg transition-all duration-200 text-sm font-medium border border-blue-400 animate-pulse"
+                          className="bg-pink-600 hover:bg-pink-700 text-white rounded-xl px-6 py-4 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-semibold border-0"
                         >
                           {button.text}
                         </div>
@@ -908,15 +932,15 @@ export default function ChatPage() {
                     />
                   </div>
                   <div className="flex-1">
-                    <div className="bg-pink-100 border-pink-200 rounded-lg p-3 border">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"></div>
+                    <div className="bg-gray-100 border-gray-200 rounded-2xl p-4 border shadow-sm">
+                      <div className="flex space-x-2">
+                        <div className="w-2.5 h-2.5 bg-pink-500 rounded-full animate-bounce"></div>
                         <div
-                          className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"
+                          className="w-2.5 h-2.5 bg-pink-500 rounded-full animate-bounce"
                           style={{ animationDelay: "0.1s" }}
                         ></div>
                         <div
-                          className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"
+                          className="w-2.5 h-2.5 bg-pink-500 rounded-full animate-bounce"
                           style={{ animationDelay: "0.2s" }}
                         ></div>
                       </div>

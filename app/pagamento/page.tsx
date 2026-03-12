@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { Card } from "@/components/ui/card"
@@ -60,21 +60,22 @@ function PagamentoContent() {
   const [copied, setCopied] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState<string>("PENDING")
   const [timeLeft, setTimeLeft] = useState<number>(3600)
-  const [hasGenerated, setHasGenerated] = useState(false)
+  const isGeneratingRef = useRef(false)
 
   useEffect(() => {
-    if (hasGenerated || !nome || !cpf) {
+    if (isGeneratingRef.current || !nome || !cpf) {
       if (!nome || !cpf) {
-        setError("Dados do cliente não encontrados")
+        setError("Dados do cliente nao encontrados")
         setIsLoading(false)
       }
       return
     }
 
+    isGeneratingRef.current = true
+
     const generatePix = async () => {
       setIsLoading(true)
       setError(null)
-      setHasGenerated(true)
 
       try {
         const amountCents = Math.round(parseFloat(valor.replace(",", ".")) * 100)
@@ -105,14 +106,14 @@ function PagamentoContent() {
       } catch (err) {
         console.error("Error generating PIX:", err)
         setError(err instanceof Error ? err.message : "Erro ao gerar PIX")
-        setHasGenerated(false)
+        isGeneratingRef.current = false
       } finally {
         setIsLoading(false)
       }
     }
 
     generatePix()
-  }, [nome, cpf, valor, telefone, email, hasGenerated])
+  }, [nome, cpf, valor, telefone, email])
 
   useEffect(() => {
     if (!pixData?.txid) return
@@ -280,7 +281,7 @@ function PagamentoContent() {
             </div>
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">Erro ao gerar PIX</h2>
             <p className="text-gray-600 mb-6">{error}</p>
-            <Button onClick={() => setHasGenerated(false)} className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 text-lg">
+            <Button onClick={() => { isGeneratingRef.current = false; window.location.reload() }} className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 text-lg">
               Tentar novamente
             </Button>
           </Card>

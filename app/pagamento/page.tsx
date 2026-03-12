@@ -148,7 +148,7 @@ export default function PagamentoPage() {
 
   if (paymentStatus === "APPROVED") {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
         <header className="bg-pink-600 text-white p-4 shadow-lg">
           <div className="max-w-4xl mx-auto flex items-center gap-3">
             <Image
@@ -159,31 +159,55 @@ export default function PagamentoPage() {
               className="h-8 w-auto"
             />
             <div className="flex-1">
-              <h1 className="font-semibold">Pagamento PIX</h1>
+              <h1 className="font-semibold">Pagamento Confirmado</h1>
               <p className="text-sm opacity-90">Serasa Limpa Nome</p>
             </div>
           </div>
         </header>
 
         <div className="max-w-lg mx-auto p-4 mt-8">
-          <Card className="p-8 text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-12 h-12 text-green-600" />
+          <Card className="p-8 text-center border-0 shadow-xl">
+            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+              <CheckCircle className="w-14 h-14 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Pagamento Aprovado!</h2>
-            <p className="text-gray-600 mb-6">
-              Seu pagamento foi confirmado com sucesso. Seu nome será limpo em até 1 hora.
-            </p>
-            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-              <p className="text-sm text-green-800">
-                <strong>Beneficiário:</strong> {nome}
+            
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Obrigado!</h2>
+            <p className="text-xl text-green-600 font-semibold mb-4">Pagamento aprovado com sucesso</p>
+            
+            <div className="bg-green-50 rounded-xl p-6 border border-green-200 mb-6">
+              <p className="text-gray-600 mb-4">
+                Seu acordo foi confirmado e seu nome sera limpo em ate 5 dias uteis.
               </p>
-              <p className="text-sm text-green-800">
-                <strong>CPF:</strong> {cpf}
+              <div className="space-y-3 text-left">
+                <div className="flex justify-between items-center py-2 border-b border-green-200">
+                  <span className="text-gray-600">Beneficiario:</span>
+                  <span className="font-semibold text-gray-800">{nome}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-green-200">
+                  <span className="text-gray-600">CPF:</span>
+                  <span className="font-semibold text-gray-800">{cpf}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-green-200">
+                  <span className="text-gray-600">Acordo:</span>
+                  <span className="font-semibold text-gray-800">83N2L618362E</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-gray-600">Valor pago:</span>
+                  <span className="font-bold text-green-600 text-lg">{formatCurrency(pixData?.amount_cents || 200)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-6">
+              <p className="text-sm text-blue-800">
+                <strong>Importante:</strong> Guarde este comprovante. Voce recebera uma confirmacao por e-mail em ate 24 horas.
               </p>
-              <p className="text-sm text-green-800">
-                <strong>Valor:</strong> {formatCurrency(pixData?.amount_cents || 7847)}
-              </p>
+            </div>
+
+            <div className="text-center text-xs text-gray-500">
+              <p>Transacao processada com seguranca</p>
+              <p>Serasa Limpa Nome - Feirão de Negociacao</p>
+              <p className="mt-2">ID: {pixData?.txid}</p>
             </div>
           </Card>
         </div>

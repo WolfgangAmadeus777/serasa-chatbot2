@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+const CPF_API_TOKEN = "9d97e993b9bb5849c7750841e4866c75"
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const cpf = searchParams.get("cpf")
@@ -12,19 +14,20 @@ export async function GET(request: NextRequest) {
     // Clean CPF (remove non-digits)
     const cleanCpf = cpf.replace(/\D/g, "")
 
-    // Call external API
-    const response = await fetch(`https://apela-api.tech/?user=a39d1d540e8677beb6b8bd8669c02df3&cpf=${cleanCpf}`, {
+    // Call CPF Brasil API
+    const response = await fetch(`https://api.cpf-brasil.org/cpf/${cleanCpf}`, {
       method: "GET",
       headers: {
+        "X-API-Key": CPF_API_TOKEN,
         "Content-Type": "application/json",
       },
     })
 
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`)
-    }
-
     const data = await response.json()
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || `API responded with status: ${response.status}`)
+    }
 
     // Get user location
     let locationData = { city: "São Paulo" } // Default fallback
@@ -37,13 +40,14 @@ export async function GET(request: NextRequest) {
       console.log("Location API failed, using fallback")
     }
 
+    // Map CPF Brasil API response to expected format
     return NextResponse.json({
       success: true,
       data: {
-        nome: data.nome || "Usuário",
-        nascimento: data.nascimento || "",
-        mae: data.mae || "",
-        sexo: data.sexo || "",
+        nome: data.data?.NOME || "Usuário",
+        nascimento: data.data?.NASC || "",
+        mae: data.data?.NOME_MAE || "",
+        sexo: data.data?.SEXO || "",
         cidade: locationData.city || "São Paulo",
       },
     })

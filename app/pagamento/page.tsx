@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { Card } from "@/components/ui/card"
@@ -19,7 +19,7 @@ interface PixData {
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white">
       <header className="bg-pink-600 text-white p-4 shadow-lg">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
           <Image
@@ -30,16 +30,16 @@ function LoadingFallback() {
             className="h-8 w-auto"
           />
           <div className="flex-1">
-            <h1 className="font-semibold">Pagamento PIX</h1>
-            <p className="text-sm opacity-90">Serasa Limpa Nome</p>
+            <h1 className="font-semibold text-lg">Pagamento PIX</h1>
+            <p className="text-sm opacity-90">Feirao Limpa Nome</p>
           </div>
         </div>
       </header>
-      <div className="max-w-lg mx-auto p-4 mt-4">
-        <Card className="p-8 text-center">
-          <Loader2 className="w-12 h-12 text-pink-600 animate-spin mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Carregando...</h2>
-          <p className="text-gray-600">Aguarde enquanto preparamos seu pagamento</p>
+      <div className="max-w-lg mx-auto p-4 mt-8">
+        <Card className="p-8 text-center bg-white shadow-xl border-0">
+          <Loader2 className="w-16 h-16 text-pink-600 animate-spin mx-auto mb-6" />
+          <h2 className="text-2xl font-semibold text-gray-800 mb-2">Gerando pagamento...</h2>
+          <p className="text-gray-600">Aguarde enquanto preparamos seu PIX</p>
         </Card>
       </div>
     </div>
@@ -60,21 +60,22 @@ function PagamentoContent() {
   const [copied, setCopied] = useState(false)
   const [paymentStatus, setPaymentStatus] = useState<string>("PENDING")
   const [timeLeft, setTimeLeft] = useState<number>(3600)
-  const [hasGenerated, setHasGenerated] = useState(false)
+  const isGeneratingRef = useRef(false)
 
   useEffect(() => {
-    if (hasGenerated || !nome || !cpf) {
+    if (isGeneratingRef.current || !nome || !cpf) {
       if (!nome || !cpf) {
-        setError("Dados do cliente não encontrados")
+        setError("Dados do cliente nao encontrados")
         setIsLoading(false)
       }
       return
     }
 
+    isGeneratingRef.current = true
+
     const generatePix = async () => {
       setIsLoading(true)
       setError(null)
-      setHasGenerated(true)
 
       try {
         const amountCents = Math.round(parseFloat(valor.replace(",", ".")) * 100)
@@ -105,14 +106,14 @@ function PagamentoContent() {
       } catch (err) {
         console.error("Error generating PIX:", err)
         setError(err instanceof Error ? err.message : "Erro ao gerar PIX")
-        setHasGenerated(false)
+        isGeneratingRef.current = false
       } finally {
         setIsLoading(false)
       }
     }
 
     generatePix()
-  }, [nome, cpf, valor, telefone, email, hasGenerated])
+  }, [nome, cpf, valor, telefone, email])
 
   useEffect(() => {
     if (!pixData?.txid) return
@@ -245,7 +246,7 @@ function PagamentoContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-white">
       <header className="bg-pink-600 text-white p-4 shadow-lg">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
           <Image
@@ -256,137 +257,154 @@ function PagamentoContent() {
             className="h-8 w-auto"
           />
           <div className="flex-1">
-            <h1 className="font-semibold">Pagamento PIX</h1>
-            <p className="text-sm opacity-90">Serasa Limpa Nome</p>
+            <h1 className="font-semibold text-lg">Pagamento PIX</h1>
+            <p className="text-sm opacity-90">Feirao Limpa Nome</p>
+          </div>
+          <div className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1">
+            <Clock className="w-4 h-4" />
+            <span className="text-sm font-medium">{formatTime(timeLeft)}</span>
           </div>
         </div>
       </header>
 
       <div className="max-w-lg mx-auto p-4 mt-4">
         {isLoading ? (
-          <Card className="p-8 text-center">
-            <Loader2 className="w-12 h-12 text-pink-600 animate-spin mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Gerando PIX...</h2>
+          <Card className="p-8 text-center bg-white shadow-xl border-0">
+            <Loader2 className="w-16 h-16 text-pink-600 animate-spin mx-auto mb-6" />
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">Gerando PIX...</h2>
             <p className="text-gray-600">Aguarde enquanto preparamos seu pagamento</p>
           </Card>
         ) : error ? (
-          <Card className="p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-8 h-8 text-red-600" />
+          <Card className="p-8 text-center bg-white shadow-xl border-0">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-10 h-10 text-red-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Erro ao gerar PIX</h2>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => setHasGenerated(false)} className="bg-pink-600 hover:bg-pink-700 text-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">Erro ao gerar PIX</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Button onClick={() => { isGeneratingRef.current = false; window.location.reload() }} className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 text-lg">
               Tentar novamente
             </Button>
           </Card>
         ) : pixData ? (
           <div className="space-y-4">
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">Pague com PIX</h2>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock className="w-4 h-4" />
-                  <span>{formatTime(timeLeft)}</span>
+            <Card className="p-6 bg-white shadow-xl border-0">
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  PIX gerado com sucesso
                 </div>
+                <h2 className="text-xl font-bold text-gray-800">Escaneie o QR Code para pagar</h2>
               </div>
 
-              <div className="bg-pink-50 rounded-lg p-4 mb-4 border border-pink-200">
-                <div className="text-center">
+              <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl p-6 mb-6">
+                <div className="text-center mb-4">
                   <p className="text-sm text-gray-600 mb-1">Valor do acordo</p>
-                  <p className="text-3xl font-bold text-pink-600">
+                  <p className="text-4xl font-bold text-pink-600">
                     {formatCurrency(pixData.amount_cents)}
                   </p>
+                  <p className="text-xs text-green-600 font-medium mt-1">Desconto de 98,7% aplicado</p>
                 </div>
               </div>
 
               <div className="flex justify-center mb-6">
-                <div className="bg-white p-4 rounded-lg border-2 border-pink-200 shadow-sm">
+                <div className="bg-white p-4 rounded-2xl border-2 border-pink-200 shadow-lg">
                   {pixData.pix.qr_code_base64 && (
                     <Image
                       src={pixData.pix.qr_code_base64}
                       alt="QR Code PIX"
-                      width={200}
-                      height={200}
-                      className="w-48 h-48"
+                      width={220}
+                      height={220}
+                      className="w-52 h-52"
                     />
                   )}
                 </div>
               </div>
 
               <div className="text-center mb-4">
-                <p className="text-sm text-gray-600 mb-2">
-                  Escaneie o QR Code acima ou copie o código abaixo
+                <p className="text-sm text-gray-500">
+                  Ou copie o codigo abaixo e cole no seu banco
                 </p>
               </div>
 
-              <div className="bg-gray-100 rounded-lg p-3 mb-4">
-                <p className="text-xs text-gray-500 mb-2 font-medium">Código Copia e Cola:</p>
-                <div className="bg-white rounded border p-2 break-all text-xs text-gray-700 max-h-20 overflow-y-auto">
+              <div className="bg-gray-100 rounded-xl p-4 mb-6">
+                <p className="text-xs text-gray-500 mb-2 font-semibold uppercase tracking-wide">Codigo Copia e Cola</p>
+                <div className="bg-white rounded-lg border border-gray-200 p-3 break-all text-xs text-gray-700 max-h-20 overflow-y-auto font-mono">
                   {pixData.pix.copia_e_cola}
                 </div>
               </div>
 
               <Button
                 onClick={handleCopy}
-                className={`w-full py-6 text-lg font-semibold transition-all ${
+                className={`w-full py-6 text-lg font-semibold transition-all rounded-xl ${
                   copied
                     ? "bg-green-600 hover:bg-green-700"
                     : "bg-pink-600 hover:bg-pink-700"
-                } text-white`}
+                } text-white shadow-lg`}
               >
                 {copied ? (
                   <>
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    Código copiado!
+                    <CheckCircle className="w-6 h-6 mr-2" />
+                    Codigo copiado!
                   </>
                 ) : (
                   <>
-                    <Copy className="w-5 h-5 mr-2" />
-                    Copiar código PIX
+                    <Copy className="w-6 h-6 mr-2" />
+                    Copiar codigo PIX
                   </>
                 )}
               </Button>
             </Card>
 
-            <Card className="p-4">
-              <h3 className="font-semibold text-gray-800 mb-3">Dados do acordo</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Beneficiário:</span>
-                  <span className="font-medium text-gray-800">{nome}</span>
+            <Card className="p-5 bg-white shadow-lg border-0">
+              <h3 className="font-bold text-gray-800 mb-4 text-lg">Dados do acordo</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-500">Beneficiario</span>
+                  <span className="font-semibold text-gray-800">{nome}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">CPF:</span>
-                  <span className="font-medium text-gray-800">{cpf}</span>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-500">CPF</span>
+                  <span className="font-semibold text-gray-800">{cpf}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Acordo:</span>
-                  <span className="font-medium text-gray-800">83N2L618362E</span>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-500">Acordo</span>
+                  <span className="font-semibold text-gray-800">83N2L618362E</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Status:</span>
-                  <span className="font-medium text-yellow-600 flex items-center gap-1">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-gray-500">Status</span>
+                  <span className="font-semibold text-yellow-600 flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full animate-pulse"></div>
                     Aguardando pagamento
                   </span>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-4 bg-blue-50 border-blue-200">
-              <h3 className="font-semibold text-blue-800 mb-2">Como pagar com PIX:</h3>
-              <ol className="text-sm text-blue-700 space-y-2">
-                <li>1. Abra o app do seu banco</li>
-                <li>2. Escolha pagar com PIX</li>
-                <li>3. Escaneie o QR Code ou cole o código</li>
-                <li>4. Confirme o pagamento</li>
+            <Card className="p-5 bg-gray-100 border-0">
+              <h3 className="font-bold text-gray-800 mb-3">Como pagar com PIX</h3>
+              <ol className="text-sm text-gray-600 space-y-3">
+                <li className="flex items-start gap-3">
+                  <span className="w-6 h-6 bg-pink-600 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                  <span>Abra o app do seu banco ou instituicao financeira</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="w-6 h-6 bg-pink-600 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                  <span>Escolha pagar com PIX QR Code ou Copia e Cola</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="w-6 h-6 bg-pink-600 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                  <span>Escaneie o QR Code ou cole o codigo copiado</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="w-6 h-6 bg-pink-600 text-white rounded-full flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                  <span>Confirme o pagamento e pronto!</span>
+                </li>
               </ol>
             </Card>
 
-            <div className="text-center text-xs text-gray-500 pb-4">
-              <p>Pagamento processado com segurança</p>
-              <p>Serasa Limpa Nome - Feirão de Negociação</p>
+            <div className="text-center text-xs text-gray-400 pb-6">
+              <p className="font-medium">Pagamento processado com seguranca</p>
+              <p>Serasa Limpa Nome - Feirao de Negociacao</p>
             </div>
           </div>
         ) : null}
